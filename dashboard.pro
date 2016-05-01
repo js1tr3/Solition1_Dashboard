@@ -20,3 +20,6 @@ OTHER_FILES += \
 
 HEADERS += \
     solitonudp.h
+
+DISTFILES += \
+#   qml/Dashboard_linear_Gauge_Stype.qml

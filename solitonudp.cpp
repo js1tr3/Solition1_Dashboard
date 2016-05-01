@@ -23,6 +23,23 @@ enum
     LOG_MODE,
     LOG_NUMFIELDS
   };
+//#define     LOG_MSTICS      1
+//#define     LOG_MINTICS     2
+//#define     LOG_AUXV        3
+//#define     LOG_PACKV       4
+//#define     LOG_CURRENT     5
+//#define     LOG_TEMP        6
+//#define     LOG_INPUT3      7
+//#define     LOG_INPUT2      8
+//#define     LOG_INPUT1      9
+//#define     LOG_THROTTLE    10
+//#define     LOG_CPULOAD     11
+//#define     LOG_PWM         12
+//#define     LOG_RPM         13
+//#define     LOG_RPMERROR    14
+//#define     LOG_MODE        15
+//#define     LOG_NUMFIELDS   16
+
 
 #define LIMIT_HIMOTORV	0x8000
 #define LIMIT_HIMOTORP	0x4000
@@ -71,6 +88,7 @@ UDPSocket::UDPSocket(QObject *parent):
 {
     m_pack_voltage="--";
     m_RunTime="0";
+    m_aux_voltage=9.9;
     // create a QUDP socket
     socket = new QUdpSocket(this);
     // The most common way to use QUdpSocket class is to bind to an address and port using bind()
@@ -93,6 +111,8 @@ void UDPSocket::readyRead()
 QByteArray datagram;
 qint64 pending_size;
 //buffer.resize(socket->pendingDatagramSize());
+//uint16_t *debug = (uint16_t *)buf;
+uint16_t dataPack[16];
 
 //QHostAddress sender;
 //quint16 senderPort;
@@ -102,11 +122,15 @@ qint64 pending_size;
 
 while(socket->hasPendingDatagrams()){
     pending_size=socket->pendingDatagramSize();
-//qDebug() << "Pending Size" << pending_size;
+qDebug() << "Pending Size" << pending_size;
     datagram.resize(pending_size);
 socket->readDatagram(datagram.data(), datagram.size());
 }
-//qDebug() << "Datagram: " << datagram.toHex();
+qDebug() << "Datagram: " << datagram.toHex();
+
+if(pending_size==32)
+        memcpy(&dataPack, datagram, 16*sizeof(uint16_t));
+
 //&sender, &senderPort);
 //qDebug() << “Message from: ” << sender.toString();
 //qDebug() << “Message port: ” << senderPort;
@@ -115,23 +139,25 @@ socket->readDatagram(datagram.data(), datagram.size());
 //int rv;
 //int numbytes;
 //char buf[MAXBUFLEN];
+//datagram.toInt()
 
 //uint16_t *debug = (uint16_t *)buf;
 
 //rv=datagram[LOG_MSTICS];
-m_Throttle=datagram[LOG_THROTTLE];//QString("%1").arg(datagram[LOG_THROTTLE], 2, 10, QChar('0'));
-m_RunTime= QString("M:S.s %1 : %2 . %3").arg(datagram[LOG_MINTICS] / 60).arg(datagram[LOG_MINTICS] % 60).arg((qreal)datagram[LOG_MSTICS] / 1000.0);
+m_Throttle=dataPack[LOG_THROTTLE];//QString("%1").arg(datagram[LOG_THROTTLE], 2, 10, QChar('0'));
+m_RunTime= QString("M:S.s %1 : %2").arg(dataPack[LOG_MINTICS] / 60).arg(dataPack[LOG_MINTICS] % 60+dataPack[LOG_MSTICS] / 1000.0);
 qDebug() << "Throttle" << m_Throttle;
-qDebug() << "RunTime: " << QString("M:S.s %1: %2. %3").arg(datagram[LOG_MINTICS] / 60).arg(datagram[LOG_MINTICS] % 60).arg((qreal)datagram[LOG_MSTICS] / 1000.0);
+qDebug() << "RunTime: " << QString("M:S.s %1: %2").arg(dataPack[LOG_MINTICS] / 60).arg((dataPack[LOG_MINTICS] % 60)+dataPack[LOG_MSTICS] / 1000.0);
 
-m_pack_voltage=QString("%1").arg(datagram.data()[LOG_PACKV], 3, 10, QChar('0'));
+m_pack_voltage=QString("%1").arg(datagram[LOG_PACKV], 3, 10, QChar('0'));
 
-m_aux_voltage=datagram[LOG_AUXV] * 0.00025939941 + 1.0;//QString("%1").arg(datagram[LOG_AUXV] * 0.00025939941 + 1.0, 3, 10, QChar('0'));
-m_RPM=datagram[LOG_RPM];
-qDebug() << "RPM" << m_RPM;
-m_Temperature=datagram[LOG_TEMP];
-qDebug() << "Temperature" << m_Temperature;
-m_CPU=datagram[LOG_CPULOAD] / 128.0;
+m_aux_voltage=dataPack[LOG_AUXV] * 0.00025939941 + 1.0;//QString("%1").arg(dataPack[LOG_AUXV] * 0.00025939941 + 1.0, 3, 10, QChar('0'));
+m_RPM=dataPack[LOG_RPM];
+//qDebug() << "RPM" << m_RPM;
+m_Temperature=((int16_t)dataPack[LOG_TEMP])/10.0;
+
+//qDebug() << "dataPack[LOG_TEMP]=" << (int16_t)dataPack[LOG_TEMP] << "\t Temperature=" << m_Temperature;
+m_CPU=dataPack[LOG_CPULOAD] / 128.0;
 
 //        debug[LOG_INPUT1] * 0.000080645,
 //        debug[LOG_INPUT2] * 0.000080645,
@@ -142,7 +168,22 @@ m_CPU=datagram[LOG_CPULOAD] / 128.0;
 
 emit dataChanged();
 
-m_errmsg=QString::fromStdString( mode[ (std::uint8_t)(datagram[LOG_MODE]) & 0x1f ] );
+m_errmsg=QString::fromStdString( mode[ (dataPack[LOG_MODE]) & 0x1f ] );
+
+m_errmsg.append(dataPack[LOG_MODE] & LIMIT_HIMOTORV ? ", High motor volt" : "");
+m_errmsg.append(dataPack[LOG_MODE] & LIMIT_HIMOTORP ? ", High motor power" : "");
+m_errmsg.append(dataPack[LOG_MODE] & LIMIT_THROTTLE ? ", Throttle limit" : "");
+m_errmsg.append(dataPack[LOG_MODE] & LIMIT_OVERREV ? ", RPM high" : "");
+
+m_errmsg.append(dataPack[LOG_MODE] & LIMIT_LOWPACKV ? ", Low pack volt" : "");
+m_errmsg.append(dataPack[LOG_MODE] & LIMIT_HIPACKC ? ", High pack current" : "");
+m_errmsg.append(dataPack[LOG_MODE] & LIMIT_HVC ? ", High pack volt throttle limit" : "");
+m_errmsg.append(dataPack[LOG_MODE] & LIMIT_CTEMP ? ", Controller temp high" : "");
+m_errmsg.append(dataPack[LOG_MODE] & LIMIT_SLEWRATE ? ", Slewrate active" : "");
+m_errmsg.append(dataPack[LOG_MODE] & LIMIT_BLOCKED ? ", Throttle blocked" : "");
+m_errmsg.append(dataPack[LOG_MODE] & LIMIT_BRAKES ? ", Brakes active" : "");
+
+
 emit msgChanged();
 
 //text_Volt
@@ -257,7 +298,7 @@ QString UDPSocket::disp_pack_voltage() const
     return m_pack_voltage;
 }
 
-QString UDPSocket::disp_motor_current() const{
+qreal UDPSocket::disp_motor_current() const{
     return m_motor_current;
 }
 
@@ -269,11 +310,11 @@ qreal UDPSocket::disp_Throttle() const{
     return m_Throttle;
 }
 
-QString UDPSocket::disp_CPU() const{
+qreal UDPSocket::disp_CPU() const{
     return m_CPU;
 }
 
-QString UDPSocket::disp_PWM() const{
+qreal UDPSocket::disp_PWM() const{
     return m_PWM;
 }
 

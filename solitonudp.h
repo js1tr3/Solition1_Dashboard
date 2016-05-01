@@ -30,11 +30,11 @@ Q_OBJECT
     Q_PROPERTY(QString disp_RunTime READ disp_RunTime NOTIFY dataChanged)
     Q_PROPERTY(qreal disp_aux_voltage READ disp_aux_voltage NOTIFY dataChanged)
     Q_PROPERTY(QString disp_pack_voltage READ disp_pack_voltage NOTIFY dataChanged)
-    Q_PROPERTY(QString disp_motor_current READ disp_motor_current NOTIFY dataChanged)
+    Q_PROPERTY(qreal disp_motor_current READ disp_motor_current NOTIFY dataChanged)
     Q_PROPERTY(qreal disp_Temperature READ disp_Temperature NOTIFY dataChanged)
     Q_PROPERTY(qreal disp_Throttle READ disp_Throttle NOTIFY dataChanged)
-    Q_PROPERTY(QString disp_CPU READ disp_CPU NOTIFY dataChanged)
-    Q_PROPERTY(QString disp_PWM READ disp_PWM NOTIFY dataChanged)
+    Q_PROPERTY(qreal disp_CPU READ disp_CPU NOTIFY dataChanged)
+    Q_PROPERTY(qreal disp_PWM READ disp_PWM NOTIFY dataChanged)
     Q_PROPERTY(qreal disp_RPM READ disp_RPM NOTIFY dataChanged)
 
     Q_PROPERTY(QString disperr READ disperr NOTIFY msgChanged)
@@ -52,11 +52,11 @@ public:
     QString disp_RunTime() const;
     qreal disp_aux_voltage() const;
     QString disp_pack_voltage() const;
-    QString disp_motor_current() const;
+    qreal disp_motor_current() const;
     qreal disp_Temperature() const;
     qreal disp_Throttle() const;
-    QString disp_CPU() const;
-    QString disp_PWM() const;
+    qreal disp_CPU() const;
+    qreal disp_PWM() const;
     qreal disp_RPM() const;
 
 
@@ -81,11 +81,11 @@ Q_SIGNALS:
     QString m_RunTime;
     qreal m_aux_voltage;
     QString m_pack_voltage;
-    QString m_motor_current;
+    qreal m_motor_current;
     qreal m_Temperature;
     qreal m_Throttle;
-    QString m_CPU;
-    QString m_PWM;
+    qreal m_CPU;
+    qreal m_PWM;
     qreal m_RPM;
 
 };
