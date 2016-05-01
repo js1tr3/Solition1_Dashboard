@@ -110,7 +110,7 @@ Window {
                     style: IconGaugeStyle {
                         id: tempGaugeStyle
 
-                        icon: "qrc:/images/temperature-icon.png"
+                        icon: "qrc:/images/temperature-icon2.png"
                         maxWarningColor: Qt.rgba(0.5, 0, 0, 1)
 
                         tickmarkStepSize: 40
