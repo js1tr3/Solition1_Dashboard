@@ -142,7 +142,7 @@ m_CPU=datagram[LOG_CPULOAD] / 128.0;
 
 emit dataChanged();
 
-m_errmsg=QString::fromStdString( mode[ datagram[LOG_MODE] & 0x1f ] );
+m_errmsg=QString::fromStdString( mode[ (std::uint8_t)(datagram[LOG_MODE]) & 0x1f ] );
 emit msgChanged();
 
 //text_Volt
