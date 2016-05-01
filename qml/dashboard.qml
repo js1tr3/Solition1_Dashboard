@@ -79,11 +79,13 @@ Window {
 
                 CircularGauge {
                     id: fuelGauge
-                    value: valueSource.fuel
-                    maximumValue: 1
-                    y: parent.height / 2 - height / 2 - container.height * 0.01
-                    width: parent.width
-                    height: parent.height * 0.7
+                    x: 0
+                    y: -73
+                    value: udp_data.disp_aux_voltage
+                    maximumValue: 14
+                    minimumValue: 10
+                    width: 150
+                    height: 100
 
                     style: IconGaugeStyle {
                         id: fuelGaugeStyle
@@ -96,16 +98,35 @@ Window {
                             visible: styleData.value === 0 || styleData.value === 1
                             font.pixelSize: fuelGaugeStyle.toPixels(0.225)
                             text: styleData.value === 0 ? "E" : (styleData.value === 1 ? "F" : "")
-                        }
+                            }
+
+
+
+
+                    }
+
+                    Text {
+                        id: aux_Volt_Text
+                        font.pixelSize: toPixels(0.3)
+                        text: udp_data.disp_aux_voltage
+                        anchors.horizontalCenterOffset: 1
+                        anchors.topMargin: 23
+                        color: "white"
+                        horizontalAlignment: Text.AlignRight
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.top: parent.verticalCenter
+
+                        //readonly property int voltAuxInt: control.value
                     }
                 }
 
                 CircularGauge {
                     value: udp_data.disp_Temperature
                     maximumValue: 80
-                    width: parent.width
-                    height: parent.height * 0.7
+                    minimumValue: 20
                     y: parent.height / 2 + container.height * 0.01
+                    width: 150
+                    height: 100
 
                     style: IconGaugeStyle {
                         id: tempGaugeStyle
@@ -121,9 +142,9 @@ Window {
 
                         tickmarkLabel: Text {
                             color: "white"
-                            visible: styleData.value === 0 || styleData.value === 1
+                            visible: styleData.value === 20 || styleData.value === 60 || styleData.value === 80
                             font.pixelSize: tempGaugeStyle.toPixels(0.225)
-                            text: styleData.value === 0 ? "C" : (styleData.value === 1 ? "H" : "")
+                            text: styleData.value === 20 ? "20 C" : (styleData.value === 60 ? "60C W" : (styleData.value === 80 ? "80C" : ""))
                         }
                     }
                 }
@@ -149,8 +170,9 @@ Window {
 
             CircularGauge {
                 id: tachometer
-                width: 200
-                height: 200
+                x: 638
+                width: 250
+                height: 250
                 value: udp_data.disp_RPM//valueSource.rpm
                 maximumValue: 8
                 anchors.verticalCenter: parent.verticalCenter
@@ -218,6 +240,60 @@ Window {
             text: udp_data.disp_RunTime //qsTr("Voltage_Here")
             styleColor: "#eb0b0b"
             font.pixelSize: 30
+        }
+
+        Rectangle {
+            x: 44
+            y: 414
+            width: 100
+            height: 172
+            color: "#494d53"
+
+            Gauge {
+                width: 53
+                height: 156
+                value: udp_data.disp_CPU
+                tickmarkStepSize: 20
+                minorTickmarkCount: 1
+                font.pixelSize: 15
+                anchors.centerIn: parent
+                anchors.horizontalCenterOffset: -4
+
+                style: GaugeStyle {
+                    valueBar: Rectangle {
+                        color: "#e34c22"
+                        implicitWidth: 28
+                    }
+
+                    foreground: null
+
+                    tickmark: Item {
+                        implicitWidth: 8
+                        implicitHeight: 4
+
+                        Rectangle {
+                            x: control.tickmarkAlignment === Qt.AlignLeft
+                                || control.tickmarkAlignment === Qt.AlignTop ? parent.implicitWidth : -28
+                            width: 28
+                            height: parent.height
+                            color: "#ffffff"
+                        }
+                    }
+
+                    minorTickmark: Item {
+                        implicitWidth: 8
+                        implicitHeight: 2
+
+                        Rectangle {
+                            x: control.tickmarkAlignment === Qt.AlignLeft
+                                || control.tickmarkAlignment === Qt.AlignTop ? parent.implicitWidth : -28
+                            width: 28
+                            height: parent.height
+                            color: "#ffffff"
+                        }
+                    }
+                }
+            }
         }
 
     }
