@@ -78,7 +78,7 @@ Window {
                 anchors.verticalCenter: parent.verticalCenter
 
                 CircularGauge {
-                    id: fuelGauge
+                    id: aux_volt_Gauge
                     x: 0
                     y: -73
                     value: udp_data.disp_aux_voltage
@@ -107,8 +107,9 @@ Window {
 
                     Text {
                         id: aux_Volt_Text
-                        font.pixelSize: toPixels(0.3)
-                        text: udp_data.disp_aux_voltage
+                        //font.pixelSize: toPixels(0.3)
+                        text: udp_data.disp_aux_voltage.toFixed(1)
+                        //QString::number(udp_data.disp_aux_voltage,'f',1)
                         anchors.horizontalCenterOffset: 1
                         anchors.topMargin: 23
                         color: "white"
