@@ -4,6 +4,7 @@
 #define MYPORT 48879
 #define MAXBUFLEN 100
 
+
 enum
   {
     LOG_MSTICS = 1,
@@ -89,6 +90,15 @@ UDPSocket::UDPSocket(QObject *parent):
     m_pack_voltage="--";
     m_RunTime="0";
     m_aux_voltage=9.9;
+    QFile logdata("logfile.txt");
+
+    if (logdata.open(QFile::WriteOnly | QFile::Truncate)) {
+        QTextStream out_logfile(&logdata);
+        out_logfile << "Test1 \n";
+              // "Result: " << qSetFieldWidth(10) << left << 3.14 << 2.7;
+        // writes "Result: 3.14      2.7       "
+    }
+
     // create a QUDP socket
     socket = new QUdpSocket(this);
     // The most common way to use QUdpSocket class is to bind to an address and port using bind()
@@ -146,8 +156,8 @@ if(pending_size==32)
 //rv=datagram[LOG_MSTICS];
 m_Throttle=dataPack[LOG_THROTTLE];//QString("%1").arg(datagram[LOG_THROTTLE], 2, 10, QChar('0'));
 m_RunTime= QString("M:S.s %1 : %2").arg(dataPack[LOG_MINTICS] / 60).arg(dataPack[LOG_MINTICS] % 60+dataPack[LOG_MSTICS] / 1000.0);
-qDebug() << "Throttle" << m_Throttle;
-qDebug() << "RunTime: " << QString("M:S.s %1: %2").arg(dataPack[LOG_MINTICS] / 60).arg((dataPack[LOG_MINTICS] % 60)+dataPack[LOG_MSTICS] / 1000.0);
+// qDebug() << "Throttle" << m_Throttle;
+// qDebug() << "RunTime: " << QString("M:S.s %1: %2").arg(dataPack[LOG_MINTICS] / 60).arg((dataPack[LOG_MINTICS] % 60)+dataPack[LOG_MSTICS] / 1000.0);
 
 m_pack_voltage=QString("%1").arg(datagram[LOG_PACKV], 3, 10, QChar('0'));
 
@@ -159,9 +169,10 @@ m_Temperature=((int16_t)dataPack[LOG_TEMP])/10.0;
 //qDebug() << "dataPack[LOG_TEMP]=" << (int16_t)dataPack[LOG_TEMP] << "\t Temperature=" << m_Temperature;
 m_CPU=dataPack[LOG_CPULOAD] / 128.0;
 
-//        debug[LOG_INPUT1] * 0.000080645,
-//        debug[LOG_INPUT2] * 0.000080645,
-//        debug[LOG_INPUT3] * 0.000080645,
+m_motor_current=dataPack[LOG_CURRENT];
+m_INPUT1=dataPack[LOG_INPUT1] * 0.000080645,
+m_INPUT2=dataPack[LOG_INPUT2] * 0.000080645,
+m_INPUT3=dataPack[LOG_INPUT3] * 0.000080645,
 
 
 
@@ -185,6 +196,21 @@ m_errmsg.append(dataPack[LOG_MODE] & LIMIT_BRAKES ? ", Brakes active" : "");
 
 
 emit msgChanged();
+
+out_logfile << m_RunTime << ","; //QString("M:S.s %1: %2").arg(dataPack[LOG_MINTICS] / 60).arg((dataPack[LOG_MINTICS] % 60)+dataPack[LOG_MSTICS] / 1000.0) << "\t";
+out_logfile << m_Throttle << ",";
+out_logfile << m_pack_voltage << ",";
+out_logfile << m_aux_voltage << ",";
+out_logfile << m_RPM << ",";
+out_logfile << m_Temperature << ",";
+out_logfile << m_CPU << ",";
+out_logfile << m_motor_current << ",";
+out_logfile << m_errmsg << "\n";
+//if (logdata.open(QFile::WriteOnly | QFile::Truncate)) {
+//    QTextStream out(&logdata);
+//    out << "Result: " << qSetFieldWidth(10) << left << 3.14 << 2.7;
+//    // writes "Result: 3.14      2.7       "
+//}
 
 //text_Volt
 

@@ -45,8 +45,8 @@
 #include <QQmlContext>
 //#include <QUdpSocket>
 #include "solitonudp.h"
-
-
+#include <QTextStream>
+#include <QFile>
 
 int main(int argc, char *argv[])
 {

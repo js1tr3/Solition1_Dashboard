@@ -3,6 +3,8 @@
 #include <QUdpSocket>
 #include <QDebug>
 #include <string>
+#include <QTextStream>
+#include <QFile>
 
 //#include <QDeclarativeItem>
 
@@ -87,7 +89,12 @@ Q_SIGNALS:
     qreal m_CPU;
     qreal m_PWM;
     qreal m_RPM;
+    qreal m_INPUT1;
+    qreal m_INPUT2;
+    qreal m_INPUT3;
 
+    QFile logdata;
+    QTextStream out_logfile;
 };
 
 #endif // SOLITONUDP_H
