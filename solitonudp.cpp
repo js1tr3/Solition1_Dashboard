@@ -90,11 +90,14 @@ UDPSocket::UDPSocket(QObject *parent):
     m_pack_voltage="--";
     m_RunTime="0";
     m_aux_voltage=9.9;
-    QFile logdata("logfile.txt");
+    m_RPM=0;
+   // QFile
+      logdata.setFileName("logfile.txt");//,QIODevice::WriteOnly);
 
     if (logdata.open(QFile::WriteOnly | QFile::Truncate)) {
-        QTextStream out_logfile(&logdata);
+        out_logfile.setDevice(&logdata);
         out_logfile << "Test1 \n";
+        qDebug() << "Creating Log file";
               // "Result: " << qSetFieldWidth(10) << left << 3.14 << 2.7;
         // writes "Result: 3.14      2.7       "
     }
@@ -132,11 +135,11 @@ uint16_t dataPack[16];
 
 while(socket->hasPendingDatagrams()){
     pending_size=socket->pendingDatagramSize();
-qDebug() << "Pending Size" << pending_size;
+//qDebug() << "Pending Size" << pending_size;
     datagram.resize(pending_size);
 socket->readDatagram(datagram.data(), datagram.size());
 }
-qDebug() << "Datagram: " << datagram.toHex();
+//qDebug() << "Datagram: " << datagram.toHex();
 
 if(pending_size==32)
         memcpy(&dataPack, datagram, 16*sizeof(uint16_t));
